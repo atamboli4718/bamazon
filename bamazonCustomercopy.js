@@ -26,7 +26,7 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
   if (err) throw err;
   //if connection is successful, display connection id
-  console.log("connected as id " + connection.threadId)
+  //console.log("connected as id " + connection.threadId)
   displayItems();
 });
 
@@ -64,7 +64,7 @@ function howManyFun(id) {
       connection.query("SELECT stock_quantity, price FROM products WHERE item_id = ?", [id.idSelection],
         function (err, res) {
           if (err) throw err;
-          console.log("id selection: " + id.idSelection);
+          //console.log("id selection: " + id.idSelection);
           //console.log(typeof(quantitySelection.quantitySelection));
           //console.log(typeof(res[0]));
           //console.log(res[0]);
