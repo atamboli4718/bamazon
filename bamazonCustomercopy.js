@@ -2,6 +2,7 @@ var mysql = require("mysql");
 var inquirer = require("inquirer");
 var Table = require('cli-table');
 
+
 //cli table 
 var table = new Table({
   head: ['ID', 'NAME', 'PRICE'],
@@ -46,28 +47,48 @@ function displayItems() {
         type: "number",
         message: "what is the id of the item you would like to purchase?"
       }, ]).then(function (idSelection) {
-        var chosenItem = idSelection
-        console.log(chosenItem);
-        howManyFun();
+        console.log("id selection: "+ idSelection.idSelection);
+        howManyFun(idSelection);
       })
   })
 }
 
-function howManyFun() {
+function howManyFun(id) {
   inquirer
     .prompt([{
       name: "quantitySelection",
       type: "number",
       message: "How many would you like to purchase?"
-    }, ]).then(function (idSelection) {
-      connection.query("SELECT stock_quantity FROM products WHERE item_id = ?", [idSelection],
-        function (err, results) {
+    }, ]).then(function (quantitySelection) {
+      //console.log(id);
+      connection.query("SELECT stock_quantity, price FROM products WHERE item_id = ?", [id.idSelection],
+        function (err, res) {
           if (err) throw err;
-          if (idSelection > results) {
-            console.log("it's yours!")
+          console.log("id selection: " + id.idSelection);
+          //console.log(typeof(quantitySelection.quantitySelection));
+          //console.log(typeof(res[0]));
+          //console.log(res[0]);
+          //console.log(res[0].stock_quantity);
+          //console.log(res[0].price);
+          if (quantitySelection.quantitySelection <= res[0].stock_quantity) {
+            var newQuantity = (res[0].stock_quantity)-(quantitySelection.quantitySelection);
+            var totalCost = (quantitySelection.quantitySelection)*(res[0].price);
+            console.log("it's yours! You're total cost is $"+ totalCost);
+            //console.log(id.idSelection);
+            reduceQuantity(newQuantity,id.idSelection);
+          } else {
+            console.log("We don't have that many, please choose another item.");
+            displayItems();
           }
-
         })
-
     })
+}
+
+function reduceQuantity(quantity,id){
+  console.log("new quantity is: "+quantity);
+  console.log("for id: "+id);
+  connection.query("UPDATE products SET stock_quantity = ? WHERE item_id = ?",[quantity,id], function (err, results) {
+    if (err) throw err;
+    displayItems();
+  })
 }
